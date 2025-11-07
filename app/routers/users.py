@@ -4,6 +4,7 @@ from typing import List
 
 from app import models, schemas
 from app.database import get_db
+from app.auth import hash_password, verify_password
 
 router = APIRouter(
     prefix="/users",
@@ -27,7 +28,10 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
             detail="Username already taken"
         )
 
-    db_user = models.User(**user.model_dump())
+    user_data = user.model_dump(exclude={'password'})
+    user_data['password_hash'] = hash_password(user.password)
+
+    db_user = models.User(**user_data)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
@@ -102,3 +106,27 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
     db.delete(db_user)
     db.commit()
     return None
+
+
+@router.post("/login", response_model=schemas.LoginResponse)
+def login(login_data: schemas.LoginRequest, db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(
+        models.User.username == login_data.username
+    ).first()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid username or password"
+        )
+
+    if not verify_password(login_data.password, user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid username or password"
+        )
+
+    return {
+        "message": "Login successful",
+        "user": user
+    }

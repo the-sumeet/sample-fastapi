@@ -3,6 +3,17 @@ from datetime import datetime
 from typing import Optional, List
 
 
+# Authentication Schemas
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+
+class LoginResponse(BaseModel):
+    message: str
+    user: "User"
+
+
 # User Schemas
 class UserBase(BaseModel):
     email: EmailStr
@@ -11,7 +22,7 @@ class UserBase(BaseModel):
 
 
 class UserCreate(UserBase):
-    pass
+    password: str
 
 
 class UserUpdate(BaseModel):
