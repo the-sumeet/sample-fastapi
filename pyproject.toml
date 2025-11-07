@@ -1,0 +1,13 @@
+[project]
+name = "fastapiproject"
+version = "0.1.0"
+description = "FastAPI Blog API Service with SQLAlchemy and SQLite"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    "sqlalchemy>=2.0.0",
+    "pydantic[email]>=2.0.0",
+    "pydantic-settings>=2.0.0",
+]
